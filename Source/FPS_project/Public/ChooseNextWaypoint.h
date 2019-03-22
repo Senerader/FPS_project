@@ -6,6 +6,7 @@
 #include "BehaviorTree/BTTaskNode.h"
 #include "ChooseNextWaypoint.generated.h"
 
+class APatrollingGuard;
 /**
  * 
  */
@@ -17,7 +18,15 @@ class FPS_PROJECT_API UChooseNextWaypoint : public UBTTaskNode
 public:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 	
+	TArray <AActor*> GetPatrolPointsBlackboard(UBehaviorTreeComponent& OwnerComp);
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
-	struct FBlackboardKeySelector Index;
+	struct FBlackboardKeySelector IndexKey;
+
+	UPROPERTY(EditAnywhere, Category = "Blackboard")
+	struct FBlackboardKeySelector WaypointKey;
+
+private:
+	APatrollingGuard* GuardCharacter = nullptr;
 };
