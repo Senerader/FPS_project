@@ -26,7 +26,4 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	struct FBlackboardKeySelector WaypointKey;
-
-private:
-	APatrollingGuard* GuardCharacter = nullptr;
 };
