@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "FPS_projectProjectile.generated.h"
+#include "BallProjectile.generated.h"
 
 UCLASS(config=Game)
-class AFPS_projectProjectile : public AActor
+class ABallProjectile : public AActor
 {
 	GENERATED_BODY()
 
@@ -20,7 +20,7 @@ class AFPS_projectProjectile : public AActor
 	class UProjectileMovementComponent* ProjectileMovement;
 
 public:
-	AFPS_projectProjectile();
+	ABallProjectile();
 
 	/** called when projectile hits something */
 	UFUNCTION()
