@@ -2,7 +2,7 @@
 
 #include "FPS_projectGameMode.h"
 #include "FPS_projectHUD.h"
-#include "FPS_projectCharacter.h"
+#include "Player/FirstPersonCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 
 AFPS_projectGameMode::AFPS_projectGameMode()
