@@ -57,8 +57,11 @@ void AFirstPersonCharacter::BeginPlay()
 	if (!ensure(GunBP)) { return; }
 	Gun = GetWorld()->SpawnActor<AGun>(GunBP, Mesh1P->GetSocketTransform(FName("GripPoint")));
 	Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
-	//FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+	// Bind fire event
+	InputComponent->BindAction("Fire", IE_Pressed, Gun, &AGun::OnFire);
 
+	//Setting up anim instance for the gun
+	Gun->AnimInstance = Mesh1P->GetAnimInstance();
 	// Show or hide the two versions of the gun based on whether or not we're using motion controllers.
 	Mesh1P->SetHiddenInGame(false, true);
 }
@@ -75,8 +78,6 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
-	// Bind fire event
-	//PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFirstPersonCharacter::OnFire);
 
 	// Bind movement events
 	PlayerInputComponent->BindAxis("MoveForward", this, &AFirstPersonCharacter::MoveForward);
