@@ -55,15 +55,13 @@ void AFirstPersonCharacter::BeginPlay()
 
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
 	if (!ensure(GunBP)) { return; }
-	Gun = GetWorld()->SpawnActor<AGun>(GunBP, Mesh1P->GetSocketTransform(FName("GripPoint")));
+	Gun = GetWorld()->SpawnActor<AGun>(GunBP);
 	Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
-	// Bind fire event
-	InputComponent->BindAction("Fire", IE_Pressed, Gun, &AGun::OnFire);
-
 	//Setting up anim instance for the gun
 	Gun->AnimInstance = Mesh1P->GetAnimInstance();
-	// Show or hide the two versions of the gun based on whether or not we're using motion controllers.
-	Mesh1P->SetHiddenInGame(false, true);
+
+	// Bind fire event
+	InputComponent->BindAction("Fire", IE_Pressed, Gun, &AGun::OnFire);
 }
 
 //////////////////////////////////////////////////////////////////////////
