@@ -43,7 +43,7 @@ public:
 	TSubclassOf<AGun> GunBP;
 
 	UFUNCTION(BlueprintCallable, Category = "Fire")
-	void Fire();
+	void PullTrigger();
 
 private:
 	//Initializing Gun actor
