@@ -45,6 +45,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Fire")
 	void PullTrigger();
 
+	//Checks if Character BP has lost player controller
+	virtual void UnPossessed() override;
+
 private:
 	//Initializing Gun actor
 	AGun* Gun = nullptr;
