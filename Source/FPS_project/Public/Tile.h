@@ -27,6 +27,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Construction")
 	void PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn, USceneComponent* StartOrigin);
-	
+
+private:
+	//Checks if any object in proximity at the SpawnPoint
+	bool IsInProximity(FVector SpawnLocation, float Radius);
 	
 };

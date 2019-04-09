@@ -3,6 +3,7 @@
 #include "Tile.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
 #include "Runtime/Engine/Classes/Components/SceneComponent.h"
+#include "DrawDebugHelpers.h"
 // Sets default values
 ATile::ATile()
 {
@@ -16,6 +17,7 @@ void ATile::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	IsInProximity(GetActorLocation(), 300);
 }
 
 // Called every frame
@@ -40,5 +42,29 @@ void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn,
 		AActor* ActorSpawned = GetWorld()->SpawnActor<AActor>(ToSpawn, SpawnPoint, FRotator::ZeroRotator);
 		ActorSpawned->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 	}
+}
+
+bool ATile::IsInProximity(FVector SpawnLocation, float Radius)
+{
+	FHitResult HitResult;
+	bool HasHit = GetWorld()->SweepSingleByChannel(
+		HitResult,
+		SpawnLocation,
+		SpawnLocation,
+		FQuat::Identity,
+		ECollisionChannel::ECC_Camera,
+		FCollisionShape::MakeSphere(Radius)
+	);
+	FColor ResultColor = HasHit ? FColor::Orange : FColor::Green;
+	DrawDebugSphere(
+		GetWorld(),
+		SpawnLocation,
+		Radius,
+		100,
+		ResultColor,
+		true,
+		100
+	);
+	return HasHit;
 }
 
