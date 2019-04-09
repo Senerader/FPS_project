@@ -16,8 +16,6 @@ ATile::ATile()
 void ATile::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	IsInProximity(GetActorLocation(), 300);
 }
 
 // Called every frame
@@ -27,44 +25,58 @@ void ATile::Tick(float DeltaTime)
 
 }
 
-void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn, USceneComponent* StartOrigin)
+void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn, float Radius)
 {
-	FVector Min = FVector(300, -1700, 0);
-	FVector Max = FVector(3700, 1700, 0);
-	FBox Bounds = FBox(Min, Max);
 	int NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
 	for (int size_t = 0; size_t < NumberToSpawn; size_t++)
 	{
-		FVector SpawnPoint = FMath::RandPointInBox(Bounds);
-		UE_LOG(LogTemp, Warning, TEXT("%s relative"), *SpawnPoint.ToString());
-		SpawnPoint.X += StartOrigin->GetComponentLocation().X;
-		UE_LOG(LogTemp, Warning, TEXT("%s world2, %s relative2"), *StartOrigin->GetComponentLocation().ToString(), *SpawnPoint.ToString());
-		AActor* ActorSpawned = GetWorld()->SpawnActor<AActor>(ToSpawn, SpawnPoint, FRotator::ZeroRotator);
-		ActorSpawned->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+		FVector SpawnPoint;
+		bool Found = FindEmptyLocation(SpawnPoint, Radius);
+		if (Found)
+		{
+			PlaceActor(ToSpawn, SpawnPoint);
+		}
 	}
 }
 
 bool ATile::IsInProximity(FVector SpawnLocation, float Radius)
 {
 	FHitResult HitResult;
+	FVector GlobalSpawnLocation = ActorToWorld().TransformPosition(SpawnLocation);
 	bool HasHit = GetWorld()->SweepSingleByChannel(
 		HitResult,
-		SpawnLocation,
-		SpawnLocation,
+		GlobalSpawnLocation,
+		GlobalSpawnLocation,
 		FQuat::Identity,
-		ECollisionChannel::ECC_Camera,
+		ECollisionChannel::ECC_GameTraceChannel2,
 		FCollisionShape::MakeSphere(Radius)
-	);
-	FColor ResultColor = HasHit ? FColor::Orange : FColor::Green;
-	DrawDebugSphere(
-		GetWorld(),
-		SpawnLocation,
-		Radius,
-		100,
-		ResultColor,
-		true,
-		100
 	);
 	return HasHit;
 }
+
+bool ATile::FindEmptyLocation(FVector & OutSpawnPoint, float Radius)
+{
+	FVector Min = FVector(300, -1700, 0);
+	FVector Max = FVector(3700, 1700, 0);
+	FBox Bounds = FBox(Min, Max);
+	const int MAX_ATTEMPTS = 50;
+	for (int32 i = 0; i < MAX_ATTEMPTS; i++)
+	{
+		FVector PossibleSpawnPoint = FMath::RandPointInBox(Bounds);
+		if (!IsInProximity(PossibleSpawnPoint, Radius))
+		{
+			OutSpawnPoint = PossibleSpawnPoint;
+			return true;
+		}
+	}
+	return false;
+}
+
+void ATile::PlaceActor(TSubclassOf<AActor> ToSpawn, FVector SpawnPoint)
+{
+	FVector GlobalSpawnPoint = ActorToWorld().TransformPosition(SpawnPoint);
+	AActor* ActorSpawned = GetWorld()->SpawnActor<AActor>(ToSpawn, GlobalSpawnPoint, FRotator::ZeroRotator);
+	ActorSpawned->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+}
+
 
