@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Tile.generated.h"
 
+class USceneComponent;
+
 UCLASS()
 class FPS_PROJECT_API ATile : public AActor
 {
@@ -24,7 +26,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Construction")
-	void PlaceActors();
+	void PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn, USceneComponent* StartOrigin);
 	
 	
 };
