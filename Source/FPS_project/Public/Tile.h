@@ -7,6 +7,7 @@
 #include "Tile.generated.h"
 
 class USceneComponent;
+class UActorPool;
 
 UCLASS()
 class FPS_PROJECT_API ATile : public AActor
@@ -20,6 +21,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	// Called when the game ends
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:	
 	// Called every frame
@@ -28,11 +31,22 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Construction")
 	void PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn = 1, int MaxSpawn = 1, float Radius = 500, float MinScale = 1.f, float MaxScale = 1.f);
 
+	//Setting reference to the pool of dynamic navmesh on the level
+	UFUNCTION(BlueprintCallable, Category = "NavMesh Pool")
+	void SetNavMeshPool(UActorPool* SettingPool);
+
 private:
 	//Checks if any object in proximity at the SpawnPoint
 	bool IsInProximity(FVector SpawnLocation, float Radius);
+
 	
 	bool FindEmptyLocation(FVector& OutSpawnPoint, float Radius);
 
 	void PlaceActor(TSubclassOf<AActor> ToSpawn, FVector SpawnPoint, float Rotation, float Scale);
+
+	void PositionNavMeshVolume();
+
+	UActorPool* NavMeshVolumePool = nullptr;
+
+	AActor* NavMeshBoundsVolume;
 };

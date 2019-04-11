@@ -4,18 +4,29 @@
 #include "Runtime/Engine/Classes/Engine/World.h"
 #include "Runtime/Engine/Classes/Components/SceneComponent.h"
 #include "DrawDebugHelpers.h"
+#include "ActorPool.h"
+
 // Sets default values
 ATile::ATile()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	
 }
 
 // Called when the game starts or when spawned
 void ATile::BeginPlay()
 {
 	Super::BeginPlay();
+
+
+}
+
+// Called when the game ends
+void ATile::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	NavMeshVolumePool->Return(NavMeshBoundsVolume);
 }
 
 // Called every frame
@@ -40,6 +51,20 @@ void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn,
 			PlaceActor(ToSpawn, SpawnPoint, RandomYawRotation, RandomScale);
 		}
 	}
+}
+
+void ATile::SetNavMeshPool(UActorPool * SettingPool)
+{
+	NavMeshVolumePool = SettingPool;
+
+	PositionNavMeshVolume();
+}
+
+void ATile::PositionNavMeshVolume()
+{
+	NavMeshBoundsVolume = NavMeshVolumePool->Checkout();
+	if (!ensure(NavMeshBoundsVolume)) { return; }
+	NavMeshBoundsVolume->SetActorLocation(GetActorLocation());
 }
 
 bool ATile::IsInProximity(FVector SpawnLocation, float Radius)
