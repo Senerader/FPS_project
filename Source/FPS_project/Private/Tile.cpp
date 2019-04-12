@@ -4,6 +4,7 @@
 #include "Runtime/Engine/Classes/Engine/World.h"
 #include "Runtime/Engine/Classes/Components/SceneComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Runtime/Engine/Classes/AI/Navigation/NavigationSystem.h"
 #include "ActorPool.h"
 
 // Sets default values
@@ -36,6 +37,26 @@ void ATile::Tick(float DeltaTime)
 
 }
 
+void ATile::SetNavMeshPool(UActorPool * SettingPool)
+{
+	NavMeshVolumePool = SettingPool;
+
+	PositionNavMeshVolume();
+}
+
+void ATile::PositionNavMeshVolume()
+{
+	NavMeshBoundsVolume = NavMeshVolumePool->Checkout();
+	if (NavMeshBoundsVolume == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[%s] Pool for checkout was empty inside the Tile C++"), *GetName());
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("[%s] Checked out {%s}"), *GetName(), *NavMeshBoundsVolume->GetName());
+	NavMeshBoundsVolume->SetActorLocation(GetActorLocation() + NavigationBoundsOffset);
+	GetWorld()->GetNavigationSystem()->Build();
+}
 void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn, float Radius, float MinScale, float MaxScale)
 {
 	int NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
@@ -51,20 +72,6 @@ void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn,
 			PlaceActor(ToSpawn, SpawnPoint, RandomYawRotation, RandomScale);
 		}
 	}
-}
-
-void ATile::SetNavMeshPool(UActorPool * SettingPool)
-{
-	NavMeshVolumePool = SettingPool;
-
-	PositionNavMeshVolume();
-}
-
-void ATile::PositionNavMeshVolume()
-{
-	NavMeshBoundsVolume = NavMeshVolumePool->Checkout();
-	if (!ensure(NavMeshBoundsVolume)) { return; }
-	NavMeshBoundsVolume->SetActorLocation(GetActorLocation());
 }
 
 bool ATile::IsInProximity(FVector SpawnLocation, float Radius)
@@ -84,8 +91,6 @@ bool ATile::IsInProximity(FVector SpawnLocation, float Radius)
 
 bool ATile::FindEmptyLocation(FVector & OutSpawnPoint, float Radius)
 {
-	FVector Min = FVector(300, -1700, 0);
-	FVector Max = FVector(3700, 1700, 0);
 	FBox Bounds = FBox(Min, Max);
 	const int MAX_ATTEMPTS = 50;
 	for (int32 i = 0; i < MAX_ATTEMPTS; i++)

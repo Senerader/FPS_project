@@ -34,6 +34,15 @@ public:
 	//Setting reference to the pool of dynamic navmesh on the level
 	UFUNCTION(BlueprintCallable, Category = "NavMesh Pool")
 	void SetNavMeshPool(UActorPool* SettingPool);
+protected:
+	//Default box spawning sizes
+	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
+	FVector Min = FVector(300, -1700, 0);
+	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
+	FVector Max = FVector(3700, 1700, 0);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Navigation")
+	FVector NavigationBoundsOffset = FVector(2000,0, 0);
 
 private:
 	//Checks if any object in proximity at the SpawnPoint

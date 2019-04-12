@@ -15,15 +15,21 @@ UActorPool::UActorPool()
 
 AActor * UActorPool::Checkout()
 {
-	return nullptr;
+	if (Pool.Num() == 0)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Pool for checkout was empty"));
+		return nullptr;
+	}
+	return Pool.Pop();
 }
 
 void UActorPool::Return(AActor * ActorToReturn)
 {
-	if (!ensure(ActorToReturn)) { return; }
+	Add(ActorToReturn);
 }
 
 void UActorPool::Add(AActor * ActorToAdd)
 {
 	if (!ensure(ActorToAdd)) { return; }
+	Pool.Push(ActorToAdd);
 }
