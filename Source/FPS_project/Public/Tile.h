@@ -9,6 +9,17 @@
 class USceneComponent;
 class UActorPool;
 
+
+USTRUCT()
+struct FSpawnPosition
+{
+	GENERATED_USTRUCT_BODY()
+	FVector SpawnLocation;
+	float Rotation;
+	float Scale;
+};
+
+
 UCLASS()
 class FPS_PROJECT_API ATile : public AActor
 {
@@ -45,13 +56,16 @@ protected:
 	FVector NavigationBoundsOffset = FVector(2000,0, 0);
 
 private:
+	//Generating all the possibilites of an actor o spawn on a tile
+	void GenerateRandomSpawnPositions(int MinSpawn, int MaxSpawn, float MinScale, float MaxScale, float Radius, TArray<FSpawnPosition> &SpawnPositions);
+
 	//Checks if any object in proximity at the SpawnPoint
 	bool IsInProximity(FVector SpawnLocation, float Radius);
 
 	
 	bool FindEmptyLocation(FVector& OutSpawnPoint, float Radius);
 
-	void PlaceActor(TSubclassOf<AActor> ToSpawn, FVector SpawnPoint, float Rotation, float Scale);
+	void PlaceActor(TSubclassOf<AActor> ToSpawn, FSpawnPosition SpawnPosition);
 
 	void PositionNavMeshVolume();
 

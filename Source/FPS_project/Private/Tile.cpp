@@ -57,19 +57,36 @@ void ATile::PositionNavMeshVolume()
 	NavMeshBoundsVolume->SetActorLocation(GetActorLocation() + NavigationBoundsOffset);
 	GetWorld()->GetNavigationSystem()->Build();
 }
+
+//Function places actor based on the global world coordinates, uses struct which describes the random values of actor's geometry
 void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn, float Radius, float MinScale, float MaxScale)
 {
-	int NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
-	for (int size_t = 0; size_t < NumberToSpawn; size_t++)
+	TArray<FSpawnPosition> SpawnPositions;
+
+	GenerateRandomSpawnPositions(MinSpawn, MaxSpawn, MinScale, MaxScale, Radius, SpawnPositions);
+
+	for (FSpawnPosition SpawnPosition : SpawnPositions)
 	{
-		FVector SpawnPoint;
-		float RandomScale = FMath::RandRange(MinScale, MaxScale);
-		bool Found = FindEmptyLocation(SpawnPoint, Radius * RandomScale);
+		PlaceActor(ToSpawn, SpawnPosition);
+	}
+}
+
+void ATile::GenerateRandomSpawnPositions(int MinSpawn, int MaxSpawn, float MinScale, float MaxScale, float Radius, TArray<FSpawnPosition> &SpawnPositions)
+{
+	int NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
+	for (int32 size = 0; size < NumberToSpawn; size++)
+	{
+		//Initializing actor's geometry
+		FSpawnPosition SpawnPosition;
+
+		SpawnPosition.Scale = FMath::RandRange(MinScale, MaxScale);
+		bool Found = FindEmptyLocation(SpawnPosition.SpawnLocation, Radius * SpawnPosition.Scale);
 		if (Found)
 		{
 			//Generating an actor with random scaling and rotation (scaling objects are predefined).
-			float RandomYawRotation = FMath::RandRange(-180.f, 180.f);
-			PlaceActor(ToSpawn, SpawnPoint, RandomYawRotation, RandomScale);
+			SpawnPosition.Rotation = FMath::RandRange(-180.f, 180.f);
+
+			SpawnPositions.Add(SpawnPosition);
 		}
 	}
 }
@@ -105,12 +122,12 @@ bool ATile::FindEmptyLocation(FVector & OutSpawnPoint, float Radius)
 	return false;
 }
 
-void ATile::PlaceActor(TSubclassOf<AActor> ToSpawn, FVector SpawnPoint, float Rotation, float Scale)
+void ATile::PlaceActor(TSubclassOf<AActor> ToSpawn, FSpawnPosition SpawnPosition)
 {
-	FVector GlobalSpawnPoint = ActorToWorld().TransformPosition(SpawnPoint);
-	AActor* ActorSpawned = GetWorld()->SpawnActor<AActor>(ToSpawn, GlobalSpawnPoint, FRotator(0, Rotation, 0));
+	FVector GlobalSpawnPoint = ActorToWorld().TransformPosition(SpawnPosition.SpawnLocation);
+	AActor* ActorSpawned = GetWorld()->SpawnActor<AActor>(ToSpawn, GlobalSpawnPoint, FRotator(0, SpawnPosition.Rotation, 0));
 	ActorSpawned->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-	ActorSpawned->SetActorScale3D(FVector(Scale));
+	ActorSpawned->SetActorScale3D(FVector(SpawnPosition.Scale));
 }
 
 
