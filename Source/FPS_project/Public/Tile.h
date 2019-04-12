@@ -60,18 +60,19 @@ protected:
 	FVector NavigationBoundsOffset = FVector(2000,0, 0);
 
 private:
-	//Generating all the possibilites of an actor o spawn on a tile
-	void GenerateRandomSpawnPositions(int MinSpawn, int MaxSpawn, float MinScale, float MaxScale, float Radius, TArray<FSpawnPosition> &SpawnPositions);
-
 	//Checks if any object in proximity at the SpawnPoint
 	bool IsInProximity(FVector SpawnLocation, float Radius);
 
 	
 	bool FindEmptyLocation(FVector& OutSpawnPoint, float Radius);
 
+	//Template version of function used to determine the types to spawn and call functions accordingly, whether it is a pawn or an actor prop
+	template <class T>
+	void PlaceActorsRandomly(TSubclassOf<T> ToSpawn, int MinSpawn = 1, int MaxSpawn = 1, float Radius = 500, float MinScale = 1.f, float MaxScale = 1.f);
+
 	void PlaceActor(TSubclassOf<AActor> ToSpawn, FSpawnPosition SpawnPosition);
 
-	void SpawnAIPawn(TSubclassOf<APawn> ToSpawn, FSpawnPosition SpawnPosition);
+	void PlaceActor(TSubclassOf<APawn> ToSpawn, FSpawnPosition SpawnPosition);
 
 	void PositionNavMeshVolume();
 

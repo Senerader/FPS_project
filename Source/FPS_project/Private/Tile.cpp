@@ -37,6 +37,7 @@ void ATile::Tick(float DeltaTime)
 
 }
 
+//Responsible for taking a copy of dynamical navmesh pool from gamemode and calling PoitionNavMeshVolume function
 void ATile::SetNavMeshPool(UActorPool * SettingPool)
 {
 	NavMeshVolumePool = SettingPool;
@@ -44,6 +45,7 @@ void ATile::SetNavMeshPool(UActorPool * SettingPool)
 	PositionNavMeshVolume();
 }
 
+//Responsible for moving our dynamically generated NavMesh volume
 void ATile::PositionNavMeshVolume()
 {
 	NavMeshBoundsVolume = NavMeshVolumePool->Checkout();
@@ -58,34 +60,9 @@ void ATile::PositionNavMeshVolume()
 	GetWorld()->GetNavigationSystem()->Build();
 }
 
-//Function places actor based on the global world coordinates, uses struct which describes the random values of actor's geometry
-void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn, float Radius, float MinScale, float MaxScale)
-{
-	TArray<FSpawnPosition> SpawnPositions;
-
-	GenerateRandomSpawnPositions(MinSpawn, MaxSpawn, MinScale, MaxScale, Radius, SpawnPositions);
-
-	for (FSpawnPosition SpawnPosition : SpawnPositions)
-	{
-		PlaceActor(ToSpawn, SpawnPosition);
-	}
-}
-
-//Function places an AI characters based on the global world coordinates, uses struct which describes the random values of pawn's geometry
-void ATile::PlaceAIPawns(TSubclassOf<APawn> ToSpawn, int MinSpawn, int MaxSpawn, float Radius)
-{
-	TArray<FSpawnPosition> SpawnPositions;
-
-	GenerateRandomSpawnPositions(MinSpawn, MaxSpawn, 1, 1, Radius, SpawnPositions);
-
-	for (FSpawnPosition SpawnPosition : SpawnPositions)
-	{
-		SpawnAIPawn(ToSpawn, SpawnPosition);
-	}
-}
-
-
-void ATile::GenerateRandomSpawnPositions(int MinSpawn, int MaxSpawn, float MinScale, float MaxScale, float Radius, TArray<FSpawnPosition> &SpawnPositions)
+//Default template function responsible for spawning actors on a tile
+template <class T>
+void ATile::PlaceActorsRandomly(TSubclassOf<T> ToSpawn, int MinSpawn, int MaxSpawn, float Radius, float MinScale, float MaxScale)
 {
 	int NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
 	for (int32 size = 0; size < NumberToSpawn; size++)
@@ -100,11 +77,24 @@ void ATile::GenerateRandomSpawnPositions(int MinSpawn, int MaxSpawn, float MinSc
 			//Generating an actor with random scaling and rotation (scaling objects are predefined).
 			SpawnPosition.Rotation = FMath::RandRange(-180.f, 180.f);
 
-			SpawnPositions.Add(SpawnPosition);
+			PlaceActor(ToSpawn, SpawnPosition);
 		}
 	}
 }
 
+//Function places actor based on the global world coordinates, uses struct which describes the random values of actor's geometry
+void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn, float Radius, float MinScale, float MaxScale)
+{
+	PlaceActorsRandomly(ToSpawn, MinSpawn, MaxSpawn, Radius, MinScale, MaxScale);
+}
+
+//Function places an AI characters based on the global world coordinates, uses struct which describes the random values of pawn's geometry
+void ATile::PlaceAIPawns(TSubclassOf<APawn> ToSpawn, int MinSpawn, int MaxSpawn, float Radius)
+{
+	PlaceActorsRandomly(ToSpawn, MinSpawn, MaxSpawn, Radius, 1, 1);
+}
+
+//Checking if any spawned object is in proximity
 bool ATile::IsInProximity(FVector SpawnLocation, float Radius)
 {
 	FHitResult HitResult;
@@ -120,6 +110,7 @@ bool ATile::IsInProximity(FVector SpawnLocation, float Radius)
 	return HasHit;
 }
 
+//Finding empty location to spawn
 bool ATile::FindEmptyLocation(FVector & OutSpawnPoint, float Radius)
 {
 	FBox Bounds = FBox(Min, Max);
@@ -136,18 +127,22 @@ bool ATile::FindEmptyLocation(FVector & OutSpawnPoint, float Radius)
 	return false;
 }
 
+//Placing a prop
 void ATile::PlaceActor(TSubclassOf<AActor> ToSpawn, FSpawnPosition SpawnPosition)
 {
 	FVector GlobalSpawnPoint = ActorToWorld().TransformPosition(SpawnPosition.SpawnLocation);
 	AActor* ActorSpawned = GetWorld()->SpawnActor<AActor>(ToSpawn, GlobalSpawnPoint, FRotator(0, SpawnPosition.Rotation, 0));
+	if (!ActorSpawned) { return; }
 	ActorSpawned->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 	ActorSpawned->SetActorScale3D(FVector(SpawnPosition.Scale));
 }
 
-void ATile::SpawnAIPawn(TSubclassOf<APawn> ToSpawn, FSpawnPosition SpawnPosition)
+//Placing an AI pawn
+void ATile::PlaceActor(TSubclassOf<APawn> ToSpawn, FSpawnPosition SpawnPosition)
 {
 	FVector GlobalSpawnPoint = ActorToWorld().TransformPosition(SpawnPosition.SpawnLocation);
 	APawn* AISpawned = GetWorld()->SpawnActor<APawn>(ToSpawn, GlobalSpawnPoint, FRotator(0, SpawnPosition.Rotation, 0));
+	if (!AISpawned) { return; }
 	AISpawned->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 	AISpawned->SpawnDefaultController();
 	AISpawned->Tags.Add(FName("Enemy"));
