@@ -42,6 +42,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Construction")
 	void PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn = 1, int MaxSpawn = 1, float Radius = 500, float MinScale = 1.f, float MaxScale = 1.f);
 
+	UFUNCTION(BlueprintCallable, Category = "Construction")
+	void PlaceAIPawns(TSubclassOf<APawn> ToSpawn, int MinSpawn = 1, int MaxSpawn = 1, float Radius = 500);
+
+
 	//Setting reference to the pool of dynamic navmesh on the level
 	UFUNCTION(BlueprintCallable, Category = "NavMesh Pool")
 	void SetNavMeshPool(UActorPool* SettingPool);
@@ -66,6 +70,8 @@ private:
 	bool FindEmptyLocation(FVector& OutSpawnPoint, float Radius);
 
 	void PlaceActor(TSubclassOf<AActor> ToSpawn, FSpawnPosition SpawnPosition);
+
+	void SpawnAIPawn(TSubclassOf<APawn> ToSpawn, FSpawnPosition SpawnPosition);
 
 	void PositionNavMeshVolume();
 

@@ -71,6 +71,20 @@ void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn,
 	}
 }
 
+//Function places an AI characters based on the global world coordinates, uses struct which describes the random values of pawn's geometry
+void ATile::PlaceAIPawns(TSubclassOf<APawn> ToSpawn, int MinSpawn, int MaxSpawn, float Radius)
+{
+	TArray<FSpawnPosition> SpawnPositions;
+
+	GenerateRandomSpawnPositions(MinSpawn, MaxSpawn, 1, 1, Radius, SpawnPositions);
+
+	for (FSpawnPosition SpawnPosition : SpawnPositions)
+	{
+		SpawnAIPawn(ToSpawn, SpawnPosition);
+	}
+}
+
+
 void ATile::GenerateRandomSpawnPositions(int MinSpawn, int MaxSpawn, float MinScale, float MaxScale, float Radius, TArray<FSpawnPosition> &SpawnPositions)
 {
 	int NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
@@ -128,6 +142,15 @@ void ATile::PlaceActor(TSubclassOf<AActor> ToSpawn, FSpawnPosition SpawnPosition
 	AActor* ActorSpawned = GetWorld()->SpawnActor<AActor>(ToSpawn, GlobalSpawnPoint, FRotator(0, SpawnPosition.Rotation, 0));
 	ActorSpawned->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 	ActorSpawned->SetActorScale3D(FVector(SpawnPosition.Scale));
+}
+
+void ATile::SpawnAIPawn(TSubclassOf<APawn> ToSpawn, FSpawnPosition SpawnPosition)
+{
+	FVector GlobalSpawnPoint = ActorToWorld().TransformPosition(SpawnPosition.SpawnLocation);
+	APawn* AISpawned = GetWorld()->SpawnActor<APawn>(ToSpawn, GlobalSpawnPoint, FRotator(0, SpawnPosition.Rotation, 0));
+	AISpawned->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+	AISpawned->SpawnDefaultController();
+	AISpawned->Tags.Add(FName("Enemy"));
 }
 
 
