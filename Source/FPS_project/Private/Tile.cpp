@@ -26,6 +26,7 @@ void ATile::BeginPlay()
 // Called when the game ends
 void ATile::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	if (!NavMeshVolumePool) { return; }
 	Super::EndPlay(EndPlayReason);
 	NavMeshVolumePool->Return(NavMeshBoundsVolume);
 }
