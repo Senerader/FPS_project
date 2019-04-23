@@ -70,6 +70,7 @@ void AGun::OnFire()
 		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 	}
 
+
 	// try and play a firing animation if specified
 	if (FPFireAnimation != NULL && TPFireAnimation != NULL)
 	{

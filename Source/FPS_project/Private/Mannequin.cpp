@@ -9,6 +9,7 @@
 #include "Gun.h"
 #include "GameFramework/InputSettings.h"
 #include "Kismet/GameplayStatics.h"
+#include "Runtime/AIModule/Classes/Perception/AISense_Hearing.h"
 
 // Sets default values
 AMannequin::AMannequin()
@@ -86,5 +87,8 @@ void AMannequin::PullTrigger()
 	if (!Gun) { return; }
 	//Firing from gun muzzle
 	Gun->OnFire();
+	//Reporting noise form firing a Gun
+	UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), 1.f, Cast<AActor>(this));
+
 }
 
