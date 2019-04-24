@@ -82,6 +82,25 @@ void AMannequin::UnPossessed()
 	Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
 }
 
+FString AMannequin::InitializeRobotCode()
+{
+	char InitialArray[10];
+	static const char CharArray[] =
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	for (int32 i = 0; i < 4; ++i) {
+		InitialArray[i] = CharArray[FMath::RandRange(0, 25)];
+	}
+	InitialArray[4] = '-';
+	static const char IntArray[] =
+		"0123456789";
+	for (int32 i = 5; i < 9; ++i) {
+		InitialArray[i] = IntArray[FMath::RandRange(0, 9)];
+	}
+	InitialArray[9] = '\0';
+	//Converting constructed array to UE4 format
+	return RobotCode = FString(UTF8_TO_TCHAR(InitialArray));
+}
+
 void AMannequin::PullTrigger()
 {
 	if (!Gun) { return; }

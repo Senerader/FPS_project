@@ -45,6 +45,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Fire")
 	void PullTrigger();
 
+	UFUNCTION(BlueprintCallable, Category = "Setup")
+	FString InitializeRobotCode();
+
 	//Checks if Character BP has lost player controller
 	virtual void UnPossessed() override;
 
@@ -52,4 +55,6 @@ private:
 	//Initializing Gun actor
 	AGun* Gun = nullptr;
 	
+	//Initializing mannequin code.
+	FString RobotCode = FString();
 };
