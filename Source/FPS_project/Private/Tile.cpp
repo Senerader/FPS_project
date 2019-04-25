@@ -115,7 +115,7 @@ bool ATile::IsInProximity(FVector SpawnLocation, float Radius)
 bool ATile::FindEmptyLocation(FVector & OutSpawnPoint, float Radius)
 {
 	FBox Bounds = FBox(Min, Max);
-	const int MAX_ATTEMPTS = 50;
+	const int MAX_ATTEMPTS = 20;
 	for (int32 i = 0; i < MAX_ATTEMPTS; i++)
 	{
 		FVector PossibleSpawnPoint = FMath::RandPointInBox(Bounds);
